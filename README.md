@@ -1,35 +1,18 @@
-# onecard_client
+## OneCard Authenticator
+<img src="./docs/images/demo.png" alt="app demo screenshot" width="600"/>
+OneCard Authenticator 앱은 조직 구성원이 온라인 서비스에서 OneCard를 사용한 인증을 수행할 때 ID 카드와 서버 간 인증 정보 교환 터널로서 기능합니다.<br><br>
 
-OneCard authenticator application.
+이 레포지터리는 [OneCard 프로젝트](https://github.com/OneCard-OSS)의 일부입니다.
+
+## 개요
+OneCard 플랫폼은 사원증과 같은 물리 보안 매체를 온라인에서도 사용할 수 있도록 OAuth 2.0 인터페이스를 노출하고 있습니다.
+
+인증을 위해 연동된 사내 시스템에서 구성원이 OneCard 로그인을 시도하면 Authenticator 앱으로 인증을 요구하는 푸시 알림이 전송됩니다.
+
+이후 알림을 수신한 사용자는 인증 요구의 출처를 확인한 후 자신의 ID 카드를 휴대폰에 태그하는 것으로 연동된 온라인 서비스에 로그인할 수 있습니다.  
 
 
-# OneCard Flutter Client
-
-NFC 카드 기반 인증 시스템과 푸시 알림을 지원하는 Flutter 애플리케이션입니다.
-
-## 🌟 주요 기능
-
-### 1. 🔐 보안 인증 시스템
-- **NFC 카드 기반 로그인**: 사번과 NFC 카드를 이용한 2단계 인증
-- **자동 로그인**: 저장된 토큰을 이용한 자동 로그인 시도
-- **토큰 갱신**: Refresh Token을 이용한 자동 액세스 토큰 갱신
-- **보안 저장소**: Flutter Secure Storage를 이용한 안전한 토큰 관리
-
-### 2. 📱 푸시 알림 시스템
-- **실시간 푸시 알림**: Socket.IO 기반 실시간 알림 수신
-- **백그라운드 서비스**: 앱이 백그라운드에 있어도 알림 수신 가능
-- **시스템 재시작 시 자동 실행**: 부팅 시 백그라운드 서비스 자동 시작
-- **Deep Link 지원**: onecard:// scheme을 통한 앱 내 네비게이션
-
-### 3. 🔗 Deep Link 기능
-- **onecard:// URL scheme 지원**
-- **푸시 알림에서 Deep Link 실행**
-- **URL 파라미터 파싱 및 표시**
-
-## 🛠️ 설치 및 설정
-
-### 1. 환경 변수 설정
-
+## 설치 및 설정
 프로젝트 루트의 `.env` 파일을 수정하여 서버 설정을 변경할 수 있습니다:
 
 ```env
@@ -54,7 +37,7 @@ LOG_LEVEL=debug
 ```
 
 
-## 📋 API 엔드포인트
+## 구현된 API 목록
 
 ### 로그인 시작
 ```
@@ -67,8 +50,8 @@ Content-Type: application/json
 
 Response:
 {
-  "attempt_id": "시도ID",
-  "response": "base64_encoded_challenge_data"
+  "attempt_id": "로그인 세션 식별자",
+  "response": "hex 문자열"
 }
 ```
 
@@ -78,7 +61,7 @@ POST /app/api/verify
 Content-Type: application/json
 
 {
-  "attempt_id": "시도ID",
+  "attempt_id": "로그인 세션 식별자",
   "pubkey": "카드_공개키",
   "encrypted_data": {
     "ciphertext": "암호화된_데이터"
@@ -123,31 +106,7 @@ Response:
 }
 ```
 
-## 🚀 사용법
-
-### 1. 최초 로그인
-1. 앱 실행 시 로그인 화면이 표시됩니다
-2. 사번을 입력하고 "NFC 카드로 로그인" 버튼을 클릭합니다
-3. NFC 카드를 휴대폰 뒷면에 가까이 대고 기다립니다
-4. 인증이 완료되면 메인 화면으로 이동합니다
-
-### 2. 자동 로그인
-- 한 번 로그인하면 다음 앱 실행 시 자동으로 로그인됩니다
-- 토큰이 만료된 경우 자동으로 갱신을 시도합니다
-- 갱신에 실패하면 다시 로그인해야 합니다
-
-### 3. 푸시 알림
-- 로그인 성공 시 자동으로 푸시 서버에 연결됩니다
-- 백그라운드에서도 알림을 수신할 수 있습니다
-- 알림을 터치하면 Deep Link가 있는 경우 해당 페이지로 이동합니다
-
-### 4. Deep Link 테스트
-- 메인 화면의 "Deep Link 테스트" 버튼을 클릭하여 기능을 확인할 수 있습니다
-- 외부에서 `onecard://test?param1=value1&param2=value2` 형태로 앱을 실행할 수 있습니다
-
-## 🔧 개발자 가이드
-
-### 파일 구조
+## 파일 구조
 ```
 lib/
 ├── config/
@@ -161,10 +120,10 @@ lib/
 ├── assets/
 │   └── NFCCommands.dart         # NFC 명령어 유틸리티
 ├── nfc_operation.dart            # NFC 카드 통신
-├── socket_service.dart          # Socket.IO 서비스
+├── socket_service.dart          # Socket.IO 푸시 대기 서비스
 ├── push_notification_service.dart # 로컬 알림 서비스
-├── deeplink_page.dart           # Deep Link 페이지
-└── main.dart                    # 메인 앱
+├── deeplink_page.dart           # Deep Link 인증 요청 페이지
+└── main.dart                    # 로그인 이후 메인 화면
 ```
 
 ### 주요 클래스
@@ -183,24 +142,3 @@ WorkManager를 사용하여 백그라운드에서 푸시 서버 연결을 유지
 
 #### NFCCardOperations
 NFC 카드와의 통신을 담당합니다.
-
-
-## 📱 지원 플랫폼
-- **Android**: API Level 21 (Android 5.0) 이상
-
-## 🔍 트러블슈팅
-
-### 1. NFC 관련 문제
-- NFC가 활성화되어 있는지 확인
-- 카드를 휴대폰 뒷면 중앙에 가까이 대기
-- 금속 케이스나 자석이 있는 경우 제거
-
-### 2. 푸시 알림 문제
-- 알림 권한이 허용되어 있는지 확인
-- 배터리 최적화에서 앱을 제외
-- 네트워크 연결 상태 확인
-
-### 3. 로그인 문제
-- 서버 URL이 올바른지 확인
-- 네트워크 연결 상태 확인
-- 사번이 올바른지 확인
