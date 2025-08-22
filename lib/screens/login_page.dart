@@ -217,7 +217,6 @@ class _LoginPageState extends State<LoginPage> {
             backgroundColor: Colors.white,
             title: const Row(
               children: [
-                Icon(Icons.nfc, color: Colors.black),
                 SizedBox(width: 8),
                 Text('NFC 카드 인증', style: TextStyle(color: Colors.black)),
               ],
